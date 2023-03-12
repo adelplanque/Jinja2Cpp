@@ -3,7 +3,10 @@
 #include "expression_evaluator.h"
 #include "generic_adapters.h"
 #include "helpers.h"
+#include "jinja2cpp/user_callable.h"
 #include "value_visitors.h"
+
+#include "string_functions.h"
 
 namespace jinja2
 {
@@ -139,8 +142,18 @@ struct SubscriptionVisitor : public visitors::BaseVisitor<>
     }
 
     template<typename CharT>
-    InternalValue operator()(std::basic_string<CharT> value, const std::basic_string<CharT>& /*fieldName*/) const
+    InternalValue operator()(std::basic_string<CharT> value, const std::basic_string<CharT>& fieldName) const
     {
+        auto field = ConvertString<std::string>(fieldName);
+        if (string_functions.count(field)) {
+            return Callable {
+                Callable::UserCallable,
+                [value, fn = string_functions.at(field)]
+                (const CallParams& params, RenderContext& context) {
+                    return fn(ConvertString<std::string>(value), params, context);
+                }
+            };
+        }
         return TargetString(std::move(value));
     }
 
