@@ -1,4 +1,9 @@
+#include <arpa/inet.h>
+#include <cstring>
 #include <functional>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -12,7 +17,6 @@ namespace jinja2
 
     InternalValue string_split(const std::string& value, const CallParams& params, RenderContext&)
     {
-        std::cerr << __PRETTY_FUNCTION__ << std::endl;
         InternalValueList result;
         std::string delim;
         if (params.posParams.size() >= 1) {
@@ -30,9 +34,41 @@ namespace jinja2
         return ListAdapter::CreateAdapter(std::move(result));
     }
 
+    InternalValue getip(const std::string& value, const CallParams& params, RenderContext&)
+    {
+        if (value == "127.0.0.1" || value == "localhost" || value == "localhost.localdomain") {
+            return std::string("127.0.0.1");
+        }
+        if (value == "AUTO") {
+            return std::string("AUTO");
+        }
+
+        struct addrinfo *info, *p;
+        std::string res;
+        if ((getaddrinfo(value.c_str(), NULL, NULL, &info)) == 0) {
+            p = info;
+            while (p != nullptr) {
+                if (p->ai_addr != nullptr) {
+                    struct sockaddr *sock = p->ai_addr;
+                    struct sockaddr_in *sock_in = (struct sockaddr_in *) sock;
+                    const char *tmp = inet_ntoa(sock_in->sin_addr);
+                    if (tmp != nullptr) {
+                        res = tmp;
+                        if (strcmp(tmp, "127.0.0.1") != 0) {
+                            break;
+                        }
+                    }
+                }
+                p = p->ai_next;
+            }
+            freeaddrinfo(info);
+        }
+        return res;
+    };
 
     std::unordered_map<std::string, StringFunction> string_functions = {
         { "split", &string_split },
+        { "ip", &getip },
     };
 
 }
