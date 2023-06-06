@@ -46,6 +46,7 @@ public:
 
     virtual void DoVisit(Type*) {}
     virtual void DoVisit(const Type*) {}
+    virtual ~VisitorIfaceImpl() = default;
 };
 
 template<typename Type>
@@ -54,6 +55,7 @@ class VisitorIfaceImpl<void, Type>
 public:
     virtual void DoVisit(Type*) {}
     virtual void DoVisit(const Type*) {}
+    virtual ~VisitorIfaceImpl() = default;
 };
 
 template<typename Base, typename ... Types>
@@ -110,6 +112,7 @@ public:
     {
         stmt->ApplyVisitor(this);
     }
+    virtual ~StatementVisitor() = default;
 };
 } // namespace jinja2
 

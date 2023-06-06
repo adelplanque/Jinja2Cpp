@@ -26,6 +26,8 @@ public:
 
 class VisitableRendererBase : public IRendererBase,  public VisitableStatement
 {
+public:
+    virtual ~VisitableRendererBase() = default;
 };
 
 using RendererPtr = std::shared_ptr<IRendererBase>;
@@ -81,6 +83,8 @@ public:
         , m_length(len)
     {
     }
+
+    virtual ~RawTextRenderer() = default;
 
     void Render(OutStream& os, RenderContext&) override
     {

@@ -7,7 +7,7 @@ namespace jinja2 {
 
 struct JINJA2CPP_EXPORT IComparable
 {
-    virtual ~IComparable() {}
+    virtual ~IComparable() = default;
     virtual bool IsEqual(const IComparable& other) const = 0;
 };
 

@@ -263,6 +263,8 @@ public:
     {
     }
 
+    virtual ~TemplateParser() = default;
+
     ParseResult Parse()
     {
         auto roughResult = DoRoughParsing();
@@ -437,7 +439,7 @@ private:
                     FinishCurrentLine(match.position() + 2);
                     return MakeParseError(ErrorCode::UnexpectedCommentEnd, MakeToken(Token::CommentEnd, { matchStart, matchStart + 2 }));
                 }
-                
+
                 m_currentBlockInfo.range.startOffset = FinishCurrentBlock(matchStart, TextBlockType::RawText);
                 break;
             case RM_ExprBegin:
